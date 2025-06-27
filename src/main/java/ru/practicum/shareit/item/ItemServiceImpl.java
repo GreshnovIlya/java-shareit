@@ -21,34 +21,37 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto create(Long owner, Item item) {
+    public Item create(Item item, Long owner) {
         if (!userStorage.getUsers().containsKey(owner)) {
             throw new NotFoundException(String.format("Пользователь с id = %s не найден", owner));
         }
-        ItemDto newItem = itemStorage.create(owner, item);
+        Item newItem = itemStorage.create(item, userStorage.getUsers().get(owner));
         log.info("Создан пользователь: {}", newItem);
         return newItem;
     }
 
     @Override
-    public ItemDto update(Long owner, Long itemId, Item item) {
-        ItemDto updateItem = itemStorage.update(owner, itemId, item);
+    public Item update(Item item, Long owner, Long itemId) {
+        if (!userStorage.getUsers().containsKey(owner)) {
+            throw new NotFoundException(String.format("Пользователь с id = %s не найден", owner));
+        }
+        Item updateItem = itemStorage.update(item, userStorage.getUsers().get(owner), itemId);
         log.info("Обновлен пользователь: {}", updateItem);
         return updateItem;
     }
 
     @Override
-    public ItemDto get(Long id) {
+    public Item get(Long id) {
         return itemStorage.get(id);
     }
 
     @Override
-    public List<ItemDto> getAllItemByOwner(Long owner) {
-        return itemStorage.getAllItemByOwner(owner);
+    public List<Item> getAllItemByOwner(Long owner) {
+        return itemStorage.getAllItemByOwner(userStorage.getUsers().get(owner));
     }
 
     @Override
-    public List<ItemDto> getItemsByNameOrDescription(String text) {
+    public List<Item> getItemsByNameOrDescription(String text) {
         return itemStorage.getItemsByNameOrDescription(text);
     }
 }

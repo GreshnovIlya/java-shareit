@@ -3,9 +3,8 @@ package ru.practicum.shareit.item;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.ArgumentException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
 
 import java.util.*;
 
@@ -15,7 +14,7 @@ public class ItemStorageInMemory implements ItemStorage {
     private Long id = 0L;
 
     @Override
-    public ItemDto create(Long owner, Item item) {
+    public Item create(Item item, User owner) {
         if (String.valueOf(item.getAvailable()).equals("null")) {
             throw new ArgumentException("Available не может быть null");
         }
@@ -23,13 +22,14 @@ public class ItemStorageInMemory implements ItemStorage {
         item.setId(id);
         item.setOwner(owner);
         items.put(id, item);
-        return ItemDtoMapper.toItemDto(item);
+        return item;
     }
 
     @Override
-    public ItemDto update(Long owner, Long itemId, Item item) {
+    public Item update(Item item, User owner, Long itemId) {
         if (items.get(itemId).getOwner() != owner) {
-            throw new NotFoundException(String.format("Пользователь с id = %s не владеет данной вещью", owner));
+            throw new NotFoundException(String.format("Пользователь с id = %s не владеет данной вещью",
+                    item.getOwner()));
         }
         Item updateItem = items.get(itemId);
         if (item.getName() != null && !item.getName().isBlank()) {
@@ -42,27 +42,30 @@ public class ItemStorageInMemory implements ItemStorage {
             updateItem.setAvailable(item.getAvailable());
         }
         updateItem.setAvailable(item.getAvailable());
-        return ItemDtoMapper.toItemDto(updateItem);
+        return updateItem;
     }
 
     @Override
-    public ItemDto get(Long id) {
-        return ItemDtoMapper.toItemDto(items.get(id));
+    public Item get(Long id) {
+        return items.get(id);
     }
 
     @Override
-    public List<ItemDto> getAllItemByOwner(Long owner) {
-        return items.values().stream().filter(item -> item.getOwner() == owner).map(ItemDtoMapper::toItemDto).toList();
+    public List<Item> getAllItemByOwner(User owner) {
+        return items.values().stream()
+                .filter(item -> item.getOwner() == owner)
+                .toList();
     }
 
     @Override
-    public List<ItemDto> getItemsByNameOrDescription(String text) {
+    public List<Item> getItemsByNameOrDescription(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
         return items.values().stream().filter(item -> (
                 item.getName().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)) ||
                 item.getDescription().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT)))
-                && item.getAvailable()).map(ItemDtoMapper::toItemDto).toList();
+                && item.getAvailable())
+                .toList();
     }
 }

@@ -3,8 +3,6 @@ package ru.practicum.shareit.user;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.EmailExistException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserDtoMapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,20 +14,20 @@ public class UserStorageInMemory implements UserStorage {
     private Long id = 0L;
 
     @Override
-    public UserDto create(User user) {
-        if (emailExists(user.getEmail())) {
-            throw new EmailExistException(String.format("Email %s уже существует", user.getEmail()));
+    public User create(User user) {
+        if (emailExists(user.getEmail()) || String.valueOf(user.getEmail()).equals("null")) {
+            throw new EmailExistException(String.format("Email %s уже существует или неверно указан", user.getEmail()));
         }
         id++;
         user.setId(id);
         users.put(id, user);
-        return UserDtoMapper.toUserDto(user);
+        return user;
     }
 
     @Override
-    public UserDto update(Long id, User user) {
+    public User update(Long id, User user) {
         if (emailExists(user.getEmail())) {
-            throw new EmailExistException(String.format("Email %s уже существует", user.getEmail()));
+            throw new EmailExistException(String.format("Email %s уже существует или неверно указан", user.getEmail()));
         }
         if (!users.containsKey(id)) {
             throw new NotFoundException(String.format("Пользователь с id = %s не найден", id));
@@ -41,17 +39,17 @@ public class UserStorageInMemory implements UserStorage {
         if (user.getEmail() != null && !user.getEmail().isBlank()) {
             updateUser.setEmail(user.getEmail());
         }
-        return UserDtoMapper.toUserDto(updateUser);
+        return updateUser;
     }
 
     @Override
-    public UserDto get(Long id) {
-        return UserDtoMapper.toUserDto(users.get(id));
+    public User get(Long id) {
+        return users.get(id);
     }
 
     @Override
-    public List<UserDto> getAll() {
-        return users.values().stream().map(UserDtoMapper::toUserDto).toList();
+    public List<User> getAll() {
+        return users.values().stream().toList();
     }
 
     @Override
@@ -61,7 +59,7 @@ public class UserStorageInMemory implements UserStorage {
 
     @Override
     public boolean emailExists(String email) {
-        return !users.values().stream().filter(item -> item.getEmail().equals(email)).toList().isEmpty();
+        return !users.values().stream().filter(user -> user.getEmail().equals(email)).toList().isEmpty();
     }
 
     @Override

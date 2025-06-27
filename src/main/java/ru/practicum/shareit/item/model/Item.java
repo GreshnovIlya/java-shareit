@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.user.User;
 
 /**
  * TODO Sprint add-controllers.
@@ -15,9 +16,9 @@ import ru.practicum.shareit.request.ItemRequest;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Item {
-    private long id;
+    private Long id;
 
-    private long owner;
+    private User owner;
 
     @NotBlank(message = "Name не должен быть пустым", groups = Default.class)
     private String name;

@@ -15,7 +15,7 @@ import ru.practicum.shareit.validation.UpdateValidationGroup;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    private long id;
+    private Long id;
 
     @NotBlank(message = "Name не должен быть пустым", groups = Default.class)
     private String name;

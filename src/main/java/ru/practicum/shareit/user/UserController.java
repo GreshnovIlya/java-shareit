@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.UserMapper;
 import ru.practicum.shareit.validation.UpdateValidationGroup;
 
 import java.util.List;
@@ -24,24 +25,22 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@Valid @RequestBody UserDto user) {
-        User a = UserMapper.toUser(user);
-        UserDto as = UserDtoMapper.toUserDto(a);
-        return UserDtoMapper.toUserDto(userService.create(UserMapper.toUser(user)));
+        return UserMapper.toUserDto(userService.create(UserMapper.toUser(user)));
     }
 
     @PatchMapping("/{id}")
     public UserDto update(@PathVariable Long id, @Validated(UpdateValidationGroup.class) @RequestBody UserDto user) {
-        return UserDtoMapper.toUserDto(userService.update(id, UserMapper.toUser(user)));
+        return UserMapper.toUserDto(userService.update(id, UserMapper.toUser(user)));
     }
 
     @GetMapping("/{id}")
     public UserDto get(@PathVariable Long id) {
-        return UserDtoMapper.toUserDto(userService.get(id));
+        return UserMapper.toUserDto(userService.get(id));
     }
 
     @GetMapping
     public List<UserDto> getAll() {
-        return userService.getAll().stream().map(UserDtoMapper::toUserDto).toList();
+        return userService.getAll().stream().map(UserMapper::toUserDto).toList();
     }
 
     @DeleteMapping("/{id}")

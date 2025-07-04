@@ -89,8 +89,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemCommentDto> getAllItemByOwner(Long ownerId) {
         List<Item> items = itemRepository.findByOwner(userRepository.findById(ownerId).orElseThrow(
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", ownerId))));
-        return items.stream().map(item ->
-            {
+        return items.stream().map(item -> {
                 ItemCommentDto itemCommentDto = ItemCommentDto.builder()
                     .id(item.getId())
                     .name(item.getName())
@@ -110,8 +109,7 @@ public class ItemServiceImpl implements ItemService {
                     return itemCommentDto;
                 }
 
-            }
-        ).toList();
+        }).toList();
     }
 
     @Override

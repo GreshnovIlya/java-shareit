@@ -4,6 +4,7 @@ spring:
       on-profile: test
 
   datasource:
-    url: jdbc:h2:mem:shareidbtest;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:shareitdbtest;DB_CLOSE_DELAY=-1
     username: sa
-    password: test_password
+    password: password

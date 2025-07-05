@@ -16,11 +16,11 @@ import ru.practicum.shareit.validation.UpdateValidationGroup;
 public class UserDto {
     private Long id;
 
-    @NotBlank(message = "Name не должен быть пустым", groups = Default.class)
+    @NotBlank(message = "Имя не должно быть пустым", groups = Default.class)
     private String name;
 
-    @NotBlank(message = "Email не должен быть пустым", groups = Default.class)
-    @Email(message = "Email должен содержать '@'",
+    @NotBlank(message = "Почта не должна быть пустой", groups = Default.class)
+    @Email(message = "Почта должна содержать '@'",
             groups = {Default.class, UpdateValidationGroup.class})
     private String email;
 }

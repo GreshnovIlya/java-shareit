@@ -20,7 +20,6 @@ public class CommentMapper {
         return new CommentDto(
                 commentDto.getId(),
                 commentDto.getText(),
-                ItemMapper.toItemDto(commentDto.getItem()),
                 commentDto.getAuthor().getName(),
                 commentDto.getCreated()
         );

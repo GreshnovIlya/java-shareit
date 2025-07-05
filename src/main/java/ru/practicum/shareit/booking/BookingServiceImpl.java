@@ -107,10 +107,11 @@ public class BookingServiceImpl implements BookingService {
                 return bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user, LocalDateTime.now());
             }
             case WAITING -> {
-                return bookingRepository.findByBookerAndStatusOrderByStartDesc(userId, "0");
+                return bookingRepository.findByBookerAndStatusOrderByStartDesc(user, StatusBooking.WAITING);
             }
             case REJECTED -> {
-                return bookingRepository.findByBookerAndStatusOrderByStartDesc(userId, "2");
+                return bookingRepository.findByBookerAndStatusOrderByStartDesc(user,
+                        StatusBooking.REJECTED);
             }
             default -> {
                 return List.of();
@@ -143,10 +144,10 @@ public class BookingServiceImpl implements BookingService {
                 return bookingRepository.findByItemOwnerAndStartIsAfterOrderByStartDesc(owner, LocalDateTime.now());
             }
             case WAITING -> {
-                return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, "0");
+                return bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(owner, StatusBooking.WAITING);
             }
             case REJECTED -> {
-                return bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(ownerId, "2");
+                return bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(owner, StatusBooking.REJECTED);
             }
             default -> {
                 return List.of();

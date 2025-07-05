@@ -4,8 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.StatusBooking;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemCommentDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.CommentMapper;
@@ -74,13 +76,13 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Вещь с id = %s не найден", id)));
         List<Booking> bookings =
-                bookingRepository.findByItemIdAndStatusAndStartIsAfterOrderByStartDesc(item.getId(),
-                        "1", LocalDateTime.now());
+                bookingRepository.findByItemAndStatusAndStartIsAfterOrderByStartDesc(item,
+                        StatusBooking.APPROVED, LocalDateTime.now());
         if (bookings.isEmpty()) {
             return ItemMapper.toItemCommentDto(item, null, null,
                     commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
         } else {
-            return ItemMapper.toItemCommentDto(item, bookings.getLast(), bookings.getFirst(),
+            return ItemMapper.toItemCommentDto(item, bookings.getLast().getStart(), bookings.getFirst().getStart(),
                     commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
         }
     }
@@ -99,13 +101,13 @@ public class ItemServiceImpl implements ItemService {
                     .comments(commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList())
                     .build();
                 List<Booking> bookings =
-                        bookingRepository.findByItemIdAndStatusAndStartIsAfterOrderByStartDesc(item.getId(),
-                                "1", LocalDateTime.now());
+                        bookingRepository.findByItemAndStatusAndStartIsAfterOrderByStartDesc(item,
+                                StatusBooking.APPROVED, LocalDateTime.now());
                 if (bookings.isEmpty()) {
                     return itemCommentDto;
                 } else {
-                    itemCommentDto.setNextBooking(bookings.getLast());
-                    itemCommentDto.setNextBooking(bookings.getFirst());
+                    itemCommentDto.setNextBooking(bookings.getLast().getStart());
+                    itemCommentDto.setNextBooking(bookings.getFirst().getStart());
                     return itemCommentDto;
                 }
 
@@ -126,8 +128,8 @@ public class ItemServiceImpl implements ItemService {
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", authorId)));
         Item item = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException(String.format("Вещь с id = %s не найден", itemId)));
-        if (bookingRepository.findByItemIdAndStatusAndBookerIdAndEndIsBeforeOrderByStartDesc(itemId, "1",
-                authorId, LocalDateTime.now()).isEmpty()) {
+        if (bookingRepository.findByItemAndStatusAndBookerAndEndIsBeforeOrderByStartDesc(item,
+                StatusBooking.APPROVED, author, LocalDateTime.now()).isEmpty()) {
             throw new BadRequestException(String.format("Пользователь с id = %s не брал в аренду эту вещь", authorId));
         }
         comment.setItem(item);

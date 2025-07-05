@@ -19,8 +19,6 @@ public class CommentDto {
     @NotBlank(message = "Комментарий не должен быть пустым", groups = Default.class)
     private String text;
 
-    private ItemDto item;
-
     private String authorName;
 
     private LocalDateTime created;

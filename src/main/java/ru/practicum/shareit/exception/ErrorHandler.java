@@ -15,7 +15,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidation(ArgumentException e) {
+    public ErrorResponse handleValidation(BadRequestException e) {
         return new ErrorResponse("Validation exception", e.getMessage());
     }
 
@@ -23,6 +23,12 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFound(NotFoundException e) {
         return new ErrorResponse("Not Found", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleNotOwner(NotOwnerException e) {
+        return new ErrorResponse("Access exception", e.getMessage());
     }
 
     @ExceptionHandler

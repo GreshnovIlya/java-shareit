@@ -19,13 +19,13 @@ import ru.practicum.shareit.request.ItemRequest;
 public class ItemDto {
     private Long id;
 
-    @NotBlank(message = "Name не должен быть пустым", groups = Default.class)
+    @NotBlank(message = "Название не должно быть пустым", groups = Default.class)
     private String name;
 
-    @NotBlank(message = "Description не должен быть пустым", groups = Default.class)
+    @NotBlank(message = "Описание не должно быть пустым", groups = Default.class)
     private String description;
 
-    @NotNull(message = "Available не должен быть пустым", groups = Default.class)
+    @NotNull(message = "Доступ не должен быть пустым", groups = Default.class)
     private Boolean available;
 
     private ItemRequest request;

@@ -216,6 +216,35 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    void testGetItemWithNextAndLastBooking() {
+        LocalDateTime localDateTime =
+                LocalDateTime.of(2100, Month.DECEMBER, 12, 12, 12, 12);
+        User owner = makeUser("Антон", "anton@email.com");
+        User booker = makeUser("Игорь", "igor@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
+        TypedQuery<Item> query = em.createQuery("Select i from Item i where i.id = :id", Item.class);
+
+        ItemDto itemDto = itemService.create(newItemDto, owner.getId());
+        NewBookingDto newBookingDto = new NewBookingDto(itemDto.getId(), localDateTime, localDateTime);
+        NewBookingDto newBookingDto1 = new NewBookingDto(itemDto.getId(), localDateTime.plusDays(1), localDateTime.plusDays(1));
+        BookingDto bookingDto = bookingService.create(newBookingDto, booker.getId());
+        bookingService.confirmation(owner.getId(), bookingDto.getId(), true);
+        BookingDto bookingDto1 = bookingService.create(newBookingDto1, booker.getId());
+        bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
+        ItemCommentDto itemCommentDto = itemService.get(itemDto.getId());
+        Item item = query.setParameter("id", itemDto.getId())
+                .getSingleResult();
+
+        assertThat(itemCommentDto.getId(), equalTo(item.getId()));
+        assertThat(itemCommentDto.getName(), equalTo(item.getName()));
+        assertThat(itemCommentDto.getDescription(), equalTo(item.getDescription()));
+        assertThat(itemCommentDto.getAvailable(), equalTo(item.getAvailable()));
+        assertThat(itemCommentDto.getLastBooking(), equalTo(localDateTime.plusDays(1)));
+        assertThat(itemCommentDto.getNextBooking(), equalTo(localDateTime));
+    }
+
+    @Test
     void failTestGetItemNotItem() {
         User user = makeUser("Антон", "anton@email.com");
         NewItemDto newItemDto =
@@ -249,7 +278,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void testGetAllItemByOwnerItemWithStartAndEndDate() {
+    void testGetAllItemByOwnerItemWithNextAndLastBooking() {
         LocalDateTime localDateTime =
                 LocalDateTime.of(2100, Month.DECEMBER, 12, 12, 12, 12);
         User owner = makeUser("Антон", "anton@email.com");

@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingMapper;
 import ru.practicum.shareit.booking.dto.State;
 import ru.practicum.shareit.booking.model.StatusBooking;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotOwnerException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -39,9 +40,9 @@ public class BookingServiceImpl implements BookingService {
                 () -> new NotFoundException(String.format("Пользователь с id %s не найден", userId)));
         Item item = itemRepository.findById(newBooking.getItemId()).orElseThrow(
                 () -> new NotFoundException(String.format("Вещь с id = %s не найден", newBooking.getItemId())));
-        /*if (!item.getAvailable()) {
+        if (!item.getAvailable()) {
             throw new BadRequestException(String.format("Вещь с id = %s нельзя забронировать", item.getId()));
-        }*/
+        }
         Booking booking = BookingMapper.toBooking(newBooking, user, item);
         bookingRepository.save(booking);
         log.info("Вещь с id = {} запрошена пользователем с id = {}", item.getId(), userId);

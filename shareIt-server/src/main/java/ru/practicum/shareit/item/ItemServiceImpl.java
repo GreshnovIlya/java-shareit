@@ -21,7 +21,6 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -92,10 +91,9 @@ public class ItemServiceImpl implements ItemService {
         if (bookings.isEmpty()) {
             return ItemMapper.toItemCommentDto(item, null, null,
                     commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
-        } else {
-            return ItemMapper.toItemCommentDto(item, bookings.getLast().getStart(), bookings.getFirst().getStart(),
-                    commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
         }
+        return ItemMapper.toItemCommentDto(item, bookings.getLast().getStart(), bookings.getFirst().getStart(),
+                    commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
     }
 
     @Override
@@ -114,19 +112,15 @@ public class ItemServiceImpl implements ItemService {
                                 StatusBooking.APPROVED, LocalDateTime.now());
                 if (bookings.isEmpty()) {
                     return itemCommentDto;
-                } else {
-                    itemCommentDto.setNextBooking(bookings.getLast().getStart());
-                    itemCommentDto.setLastBooking(bookings.getFirst().getStart());
-                    return itemCommentDto;
                 }
+                itemCommentDto.setNextBooking(bookings.getLast().getStart());
+                itemCommentDto.setLastBooking(bookings.getFirst().getStart());
+                return itemCommentDto;
         }).toList();
     }
 
     @Override
     public List<ItemDto> getItemsByNameOrDescription(String text) {
-        /*if (text.isBlank()) {
-            return new ArrayList<>();
-        }*/
         return itemRepository.findItemsByNameOrDescriptionContainingIgnoreCase(text)
                 .stream().map(ItemMapper::toItemDto).toList();
     }

@@ -15,6 +15,7 @@ import ru.practicum.shareit.booking.dto.NewBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.dto.State;
 import ru.practicum.shareit.booking.model.StatusBooking;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ErrorHandler;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.NotOwnerException;
@@ -77,7 +78,7 @@ public class BookingServiceImplTest {
         NewBookingDto newBookingDto = new NewBookingDto(item.getId(), LocalDateTime.now(), LocalDateTime.now());
 
         errorHandler.handleNotFound(Assertions.assertThrows(NotFoundException.class, () -> {
-            BookingDto bookingDto = bookingService.create(newBookingDto, booker.getId() + 1);
+            bookingService.create(newBookingDto, booker.getId() + 1);
         }, String.format("Пользователь с id %s не найден", booker.getId() + 1)));
     }
 
@@ -90,8 +91,22 @@ public class BookingServiceImplTest {
         TypedQuery<Booking> query = em.createQuery("Select b from Booking b where b.id = :id", Booking.class);
 
         Assertions.assertThrows(NotFoundException.class, () -> {
-            BookingDto bookingDto = bookingService.create(newBookingDto, booker.getId());
+            bookingService.create(newBookingDto, booker.getId());
         }, String.format("Вещь с id = %s не найден", item.getId() + 1));
+    }
+
+    @Test
+    void failTestCreateBookingUnavailable() {
+        User owner = makeUser("Антон", "anton@email.com");
+        User booker = makeUser("Игорь", "igor@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", false, null);
+        ItemDto itemDto = itemService.create(newItemDto, owner.getId());
+        NewBookingDto newBookingDto = new NewBookingDto(itemDto.getId(), LocalDateTime.now(), LocalDateTime.now());
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+           bookingService.create(newBookingDto, booker.getId());
+        }, String.format("Вещь с id = %s нельзя забронировать", newBookingDto.getItemId()));
     }
 
     @Test

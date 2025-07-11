@@ -88,12 +88,13 @@ public class ItemServiceImpl implements ItemService {
         List<Booking> bookings =
                 bookingRepository.findByItemAndStatusAndStartIsAfterOrderByStartDesc(item,
                         StatusBooking.APPROVED, LocalDateTime.now());
-        if (bookings.isEmpty()) {
-            return ItemMapper.toItemCommentDto(item, null, null,
-                    commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
+        ItemCommentDto itemCommentDto = ItemMapper.toItemCommentDto(item, null, null,
+                commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
+        if (!bookings.isEmpty()) {
+            itemCommentDto.setNextBooking(bookings.getLast().getStart());
+            itemCommentDto.setLastBooking(bookings.getFirst().getStart());
         }
-        return ItemMapper.toItemCommentDto(item, bookings.getLast().getStart(), bookings.getFirst().getStart(),
-                    commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
+        return itemCommentDto;
     }
 
     @Override
@@ -110,11 +111,10 @@ public class ItemServiceImpl implements ItemService {
                 List<Booking> bookings =
                         bookingRepository.findByItemAndStatusAndStartIsAfterOrderByStartDesc(item,
                                 StatusBooking.APPROVED, LocalDateTime.now());
-                if (bookings.isEmpty()) {
-                    return itemCommentDto;
+                if (!bookings.isEmpty()) {
+                    itemCommentDto.setNextBooking(bookings.getLast().getStart());
+                    itemCommentDto.setLastBooking(bookings.getFirst().getStart());
                 }
-                itemCommentDto.setNextBooking(bookings.getLast().getStart());
-                itemCommentDto.setLastBooking(bookings.getFirst().getStart());
                 return itemCommentDto;
         }).toList();
     }

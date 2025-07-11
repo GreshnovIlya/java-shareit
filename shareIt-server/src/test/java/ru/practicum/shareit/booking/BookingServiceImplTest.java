@@ -71,7 +71,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestCreateBookingNotUser() {
+    void errorTestCreateBookingNotUser() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         Item item = makeItem(owner.getId());
@@ -83,7 +83,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestCreateBookingNotItem() {
+    void errorTestCreateBookingNotItem() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         Item item = makeItem(owner.getId());
@@ -96,7 +96,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestCreateBookingUnavailable() {
+    void errorTestCreateBookingUnavailable() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         NewItemDto newItemDto =
@@ -142,7 +142,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestConfirmationBookingNotBooking() {
+    void errorTestConfirmationBookingNotBooking() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         Item item = makeItem(owner.getId());
@@ -155,7 +155,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestConfirmationBookingNotOwner() {
+    void errorTestConfirmationBookingNotOwner() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         Item item = makeItem(owner.getId());
@@ -189,7 +189,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestGetBookingNotBooking() {
+    void errorTestGetBookingNotBooking() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         Item item = makeItem(owner.getId());
@@ -202,7 +202,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestGetBookingNotOwnerOrRequester() {
+    void errorTestGetBookingNotOwnerOrRequester() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         User user = makeUser("Константин", "kostia@email.com");
@@ -328,7 +328,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestGetAllBookingUserNotUser() {
+    void errorTestGetAllBookingUserNotUser() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         Item item1 = makeItem(owner.getId());
@@ -461,7 +461,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void failTestGetAllBookingOwnerNotUser() {
+    void errorTestGetAllBookingOwnerNotUser() {
         User owner = makeUser("Антон", "anton@email.com");
         User booker = makeUser("Игорь", "igor@email.com");
         Item item1 = makeItem(owner.getId());

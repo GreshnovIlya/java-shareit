@@ -3,12 +3,14 @@ package ru.practicum.shareit.request;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.ShareItServer;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.ItemServiceImpl;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -52,6 +54,17 @@ public class ItemRequestServiceImplTest {
         assertThat(itemRequest.getDescription(), equalTo(itemRequestDto.getDescription()));
         assertThat(itemRequest.getCreated(), equalTo(itemRequestDto.getCreated()));
         assertThat(itemRequest.getRequester(), equalTo(requester));
+    }
+
+    @Test
+    void errorTestCreateRequestNotRequester() {
+        User requester = makeUser("Антон", "anton@email.com");
+        ItemRequestDto newItemRequestDto = new ItemRequestDto(null, "Может забивать гвозди",
+                LocalDateTime.now(), UserMapper.toUserDto(requester), null);
+
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            itemRequestService.create(newItemRequestDto, requester.getId() + 1);
+        }, String.format("Пользователь с id = %s не найден", requester.getId() + 1));
     }
 
     @Test

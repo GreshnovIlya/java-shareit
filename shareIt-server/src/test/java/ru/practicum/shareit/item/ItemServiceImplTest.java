@@ -26,10 +26,12 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestService;
 import ru.practicum.shareit.request.ItemRequestServiceImpl;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestInItemDto;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.UserServiceImpl;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.model.UserMapper;
 
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -73,7 +75,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestSaveItemNotUser() {
+    void errorTestSaveItemNotUser() {
         User user = makeUser("Антон", "anton@email.com");
         NewItemDto newItemDto =
                 new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
@@ -108,7 +110,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestSaveItemThroughRequestNotRequest() {
+    void errorTestSaveItemThroughRequestNotRequest() {
         UserDto userDto = new UserDto(null, "Имя", "email@iandex.ru");
         userDto = userService.create(userDto);
         ItemRequestDto newItemRequestDto = new ItemRequestDto(null, "Может забивать гвозди",
@@ -126,7 +128,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestSaveItemThroughRequestNotUser() {
+    void errorTestSaveItemThroughRequestNotUser() {
         User user = makeUser("Антон", "anton@email.com");
         NewItemDto newItemDto =
                 new NewItemDto(null, "Чайник", "Кипятит воду", true, 1L);
@@ -161,7 +163,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestUpdateItemNotUser() {
+    void errorTestUpdateItemNotUser() {
         User user = makeUser("Антон", "anton@email.com");
         NewItemDto newItemDto =
                 new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
@@ -179,7 +181,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestUpdateItemNotOwner() {
+    void errorTestUpdateItemNotOwner() {
         User user = makeUser("Антон", "anton@email.com");
         User user1 = makeUser("Игорь", "igor@email.com");
         NewItemDto newItemDto =
@@ -216,6 +218,30 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    void testGetItemWithRequest() {
+        User owner = makeUser("Антон", "anton@email.com");
+        User requester = makeUser("Игорь", "igor@email.com");
+        ItemRequestDto newItemRequestDto = new ItemRequestDto(null, "Может забивать гвозди",
+                LocalDateTime.now(), UserMapper.toUserDto(requester), null);
+        TypedQuery<Item> query = em.createQuery("Select i from Item i where i.id = :id", Item.class);
+
+        ItemRequestDto itemRequestDto = itemRequestService.create(newItemRequestDto, requester.getId());
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, itemRequestDto.getId());
+        ItemDto itemDto = itemService.create(newItemDto, owner.getId());
+        ItemCommentDto itemCommentDto = itemService.get(itemDto.getId());
+        Item item = query.setParameter("id", itemDto.getId())
+                .getSingleResult();
+
+        assertThat(itemCommentDto.getId(), equalTo(item.getId()));
+        assertThat(itemCommentDto.getName(), equalTo(item.getName()));
+        assertThat(itemCommentDto.getDescription(), equalTo(item.getDescription()));
+        assertThat(itemCommentDto.getAvailable(), equalTo(item.getAvailable()));
+        assertThat(itemCommentDto.getRequest(), equalTo(new ItemRequestInItemDto(itemRequestDto.getId(),
+                itemRequestDto.getDescription(), itemRequestDto.getCreated(), itemRequestDto.getRequester())));
+    }
+
+    @Test
     void testGetItemWithNextAndLastBooking() {
         LocalDateTime localDateTime =
                 LocalDateTime.of(2100, Month.DECEMBER, 12, 12, 12, 12);
@@ -245,7 +271,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestGetItemNotItem() {
+    void errorTestGetItemNotItem() {
         User user = makeUser("Антон", "anton@email.com");
         NewItemDto newItemDto =
                 new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
@@ -309,7 +335,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestGetAllItemByOwnerItemNotUser() {
+    void errorTestGetAllItemByOwnerItemNotUser() {
         User user = makeUser("Антон", "anton@email.com");
         NewItemDto newItemDto =
                 new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
@@ -375,7 +401,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestCreateCommitNotUser() throws InterruptedException {
+    void errorTestCreateCommitNotUser() throws InterruptedException {
         User owner = makeUser("Антон", "anton@email.com");
         User author = makeUser("Игорь", "igor@email.com");
         NewItemDto newItemDto =
@@ -395,7 +421,7 @@ public class ItemServiceImplTest {
     }
 
     @Test
-    void failTestCreateCommitNotBooker() throws InterruptedException {
+    void errorTestCreateCommitNotBooker() throws InterruptedException {
         User owner = makeUser("Антон", "anton@email.com");
         User author = makeUser("Игорь", "igor@email.com");
         User user = makeUser("Инна", "inna@email.com");

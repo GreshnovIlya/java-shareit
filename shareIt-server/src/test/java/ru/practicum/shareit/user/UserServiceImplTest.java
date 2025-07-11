@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.ShareItServer;
 import ru.practicum.shareit.exception.EmailExistException;
 import ru.practicum.shareit.exception.ErrorHandler;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
@@ -46,10 +47,9 @@ class UserServiceImplTest {
     }
 
     @Test
-    void failTestCreateUserEmailExist() {
+    void errorTestCreateUserEmailExist() {
         UserDto userDto = new UserDto(null, "Антон", "anton@email.com");
         UserDto userDto1 = new UserDto(null, "Антон", "anton@email.com");
-        TypedQuery<User> query = em.createQuery("Select u from User u where u.email = :email", User.class);
 
         userService.create(userDto);
         errorHandler.handleEmailValidation(Assertions.assertThrows(EmailExistException.class, () -> {
@@ -75,6 +75,30 @@ class UserServiceImplTest {
         assertThat(updateUser.getId(), notNullValue());
         assertThat(updateUser.getEmail(), equalTo(updateUserDto.getEmail()));
         assertThat(updateUser.getName(), equalTo(updateUserDto.getName()));
+    }
+
+    @Test
+    void errorTestUpdateUserEmailExist() {
+        UserDto userDto = new UserDto(null, "Игорь", "igor@email.com");
+        UserDto userDto1 = new UserDto(null, "Игорь", "igorian@email.com");
+
+        userService.create(userDto);
+        userService.create(userDto1);
+        UserDto updateUserDto = new UserDto(null, "Игорян", "igorian@email.com");
+        Assertions.assertThrows(EmailExistException.class, () -> {
+            userService.update(userDto.getId(), updateUserDto);
+        }, String.format("Почта %s уже существует или неверно указана", userDto1.getEmail()));
+    }
+
+    @Test
+    void errorTestUpdateUserNotUser() {
+        UserDto userDto = new UserDto(null, "Игорь", "igor@email.com");
+
+        UserDto user = userService.create(userDto);
+        UserDto updateUserDto = new UserDto(null, "Игорян", "igorian@email.com");
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            userService.update(user.getId() + 1, updateUserDto);
+        }, String.format("Пользователь с id = %s не найден", user.getId() + 1));
     }
 
     @Test

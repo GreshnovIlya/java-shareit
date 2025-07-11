@@ -30,9 +30,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDto create(ItemRequestDto itemRequestDto, Long requesterId) {
         ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto);
-        if (itemRequest.getDescription().isBlank()) {
-            throw new BadRequestException("Описание не должно быть пустым");
-        }
         itemRequest.setRequester(userRepository.findById(requesterId).orElseThrow(
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", requesterId))));
         itemRequest.setCreated(LocalDateTime.now());

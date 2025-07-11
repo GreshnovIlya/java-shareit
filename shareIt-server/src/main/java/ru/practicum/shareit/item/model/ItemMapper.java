@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class ItemMapper {
-    public static Item toItem(ItemDto itemDto) {
+    public static Item toItem(ItemDto itemDto, User user) {
         return new Item(
                 0L,
-                new User(),
+                user,
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
@@ -24,14 +24,14 @@ public class ItemMapper {
         );
     }
 
-    public static Item toItem(NewItemDto itemDto) {
+    public static Item toItem(NewItemDto itemDto, ItemRequest itemRequest, User user) {
         return new Item(
                 0L,
-                new User(),
+                user,
                 itemDto.getName(),
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
-                null
+                itemRequest
         );
     }
 

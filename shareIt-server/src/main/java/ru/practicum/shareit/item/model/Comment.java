@@ -9,21 +9,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
-@ToString
-@NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
+@NoArgsConstructor
 @Entity
 @Table(name = "comments")
 public class Comment {

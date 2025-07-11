@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
             throw new EmailExistException(String.format("Почта %s уже существует или неверно указана", user.getEmail()));
         }
         User newUser = userRepository.save(UserMapper.toUser(user));
-        log.info("Создан пользователь: {}", newUser);
+        //log.info("Создан пользователь: {}", newUser);
         return UserMapper.toUserDto(newUser);
     }
 
@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
             updateUser.setEmail(user.getEmail());
         }
         userRepository.save(updateUser);
-        log.info("Обновлен пользователь: {}", updateUser);
+        //log.info("Обновлен пользователь: {}", updateUser);
         return UserMapper.toUserDto(updateUser);
     }
 
@@ -63,6 +63,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public void remove(Long id) {
         userRepository.deleteById(id);
-        log.info("Удален пользователь с id = {}", id);
+        //log.info("Удален пользователь с id = {}", id);
     }
 }

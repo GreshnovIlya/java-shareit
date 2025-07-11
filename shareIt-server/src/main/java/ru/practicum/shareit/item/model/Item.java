@@ -8,12 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
@@ -23,8 +18,8 @@ import ru.practicum.shareit.user.model.User;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 @Entity
 @Table(name = "items")
@@ -33,14 +28,18 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
 
+    @Setter
     private String name;
 
+    @Setter
     private String description;
 
+    @Setter
     private Boolean available;
 
     @ManyToOne(fetch = FetchType.LAZY)

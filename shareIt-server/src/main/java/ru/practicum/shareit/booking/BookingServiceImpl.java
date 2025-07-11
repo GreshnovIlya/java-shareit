@@ -45,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
         }
         Booking booking = BookingMapper.toBooking(newBooking, user, item);
         bookingRepository.save(booking);
-        log.info("Вещь с id = {} запрошена пользователем с id = {}", item.getId(), userId);
+        //log.info("Вещь с id = {} запрошена пользователем с id = {}", item.getId(), userId);
         return BookingMapper.toBookingDto(booking);
     }
 
@@ -62,7 +62,7 @@ public class BookingServiceImpl implements BookingService {
         } else {
             booking.setStatus(StatusBooking.REJECTED);
         }
-        log.info("Вещь с id = {} забронирована пользователем с id = {}", item.getId(), booking.getBooker().getId());
+        //log.info("Вещь с id = {} забронирована пользователем с id = {}", item.getId(), booking.getBooker().getId());
         bookingRepository.save(booking);
         return BookingMapper.toBookingDto(booking);
     }

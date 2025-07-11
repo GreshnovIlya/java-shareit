@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.model.CommentMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemMapper;
 import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.model.ItemRequestMapper;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
@@ -44,23 +45,24 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto create(NewItemDto itemDto, Long owner) {
-        Item item = ItemMapper.toItem(itemDto);
+        ItemRequest itemRequest = null;
         if (itemDto.getRequestId() != null) {
-            item.setRequest(itemRequestRepository.findById(itemDto.getRequestId()).orElseThrow(
-                    () -> new NotFoundException(String.format("Запрос с id = %s не найден", itemDto.getRequestId()))));
+            itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElseThrow(
+                    () -> new NotFoundException(String.format("Запрос с id = %s не найден", itemDto.getRequestId())));
         }
-        item.setOwner(userRepository.findById(owner).orElseThrow(
-                () -> new NotFoundException(String.format("Пользователь с id = %s не найден", owner))));
+        User user = userRepository.findById(owner).orElseThrow(
+                () -> new NotFoundException(String.format("Пользователь с id = %s не найден", owner)));
+        Item item = ItemMapper.toItem(itemDto, itemRequest, user);
         Item newItem = itemRepository.save(item);
-        log.info("Создана вещь: {}", newItem);
+        //log.info("Создана вещь: {}", newItem);
         return ItemMapper.toItemDto(newItem);
     }
 
     @Override
     public ItemDto update(ItemDto itemDto, Long owner, Long itemId) {
-        Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userRepository.findById(owner).orElseThrow(
-                () -> new NotFoundException(String.format("Пользователь с id = %s не найден", owner))));
+        User user = userRepository.findById(owner).orElseThrow(
+                () -> new NotFoundException(String.format("Пользователь с id = %s не найден", owner)));
+        Item item = ItemMapper.toItem(itemDto, user);
         Item updateItem = itemRepository.findById(itemId).orElseThrow(
                 () -> new NotFoundException(String.format("Вещь с id = %s не найден", itemId)));
         if (updateItem.getOwner() != item.getOwner()) {
@@ -77,7 +79,7 @@ public class ItemServiceImpl implements ItemService {
             updateItem.setAvailable(item.getAvailable());
         }
         itemRepository.save(updateItem);
-        log.info("Обновлена вещь: {}", updateItem);
+        //log.info("Обновлена вещь: {}", updateItem);
         return ItemMapper.toItemDto(updateItem);
     }
 
@@ -127,7 +129,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(CommentDto commentDto, Long authorId, Long itemId) {
-        Comment comment = CommentMapper.toComment(commentDto);
         User author = userRepository.findById(authorId).orElseThrow(
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", authorId)));
         Item item = itemRepository.findById(itemId).orElseThrow(
@@ -136,10 +137,9 @@ public class ItemServiceImpl implements ItemService {
                 StatusBooking.APPROVED, author, LocalDateTime.now()).isEmpty()) {
             throw new BadRequestException(String.format("Пользователь с id = %s не брал в аренду эту вещь", authorId));
         }
-        comment.setItem(item);
-        comment.setAuthor(author);
+        Comment comment = CommentMapper.toComment(commentDto, item, author);
         Comment newComment = commentRepository.save(comment);
-        log.info("Создан отзыв: {}", newComment);
+        //log.info("Создан отзыв: {}", newComment);
         return CommentMapper.toCommentDto(newComment);
     }
 }

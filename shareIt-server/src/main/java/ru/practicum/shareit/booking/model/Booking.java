@@ -12,11 +12,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.Setter;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -26,9 +24,6 @@ import java.time.LocalDateTime;
  * TODO Sprint add-bookings.
  */
 @Getter
-@Setter
-@ToString
-@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @Entity
@@ -52,6 +47,7 @@ public class Booking {
     @JoinColumn(name = "booker_id")
     private User booker;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private StatusBooking status;
 }

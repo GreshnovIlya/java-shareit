@@ -1,9 +1,6 @@
 package ru.practicum.shareit.request.dto;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import ru.practicum.shareit.item.dto.ItemAnswerDto;
@@ -16,9 +13,6 @@ import java.util.List;
  * TODO Sprint add-item-requests.
  */
 @Getter
-@Setter
-@ToString
-@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class ItemRequestDto {

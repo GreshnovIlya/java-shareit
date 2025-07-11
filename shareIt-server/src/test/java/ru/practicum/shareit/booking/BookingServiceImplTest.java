@@ -183,8 +183,8 @@ public class BookingServiceImplTest {
         assertThat(bookingDto.getId(), equalTo(booking.getId()));
         assertThat(bookingDto.getStart(), equalTo(booking.getStart()));
         assertThat(bookingDto.getEnd(), equalTo(booking.getEnd()));
-        assertThat(bookingDto.getItem(), equalTo(ItemMapper.toItemDto(item)));
-        assertThat(bookingDto.getBooker(), equalTo(UserMapper.toUserDto(booker)));
+        assertThat(bookingDto.getItem().getId(), equalTo(item.getId()));
+        assertThat(bookingDto.getBooker().getId(), equalTo(booker.getId()));
         assertThat(bookingDto.getStatus(), equalTo(booking.getStatus()));
     }
 

@@ -9,11 +9,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -22,11 +18,7 @@ import java.time.LocalDateTime;
  * TODO Sprint add-item-requests.
  */
 @Getter
-@Setter
-@ToString
-@NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
 @Entity
 @Table(name = "item_requests")
 public class ItemRequest {

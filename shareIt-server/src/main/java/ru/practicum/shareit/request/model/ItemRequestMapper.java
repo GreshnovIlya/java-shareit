@@ -6,15 +6,16 @@ import ru.practicum.shareit.request.dto.ItemRequestInItemDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.model.UserMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ItemRequestMapper {
-    public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
+    public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto, User user) {
         return new ItemRequest(
                 0L,
                 itemRequestDto.getDescription(),
-                itemRequestDto.getCreated(),
-                new User()
+                LocalDateTime.now(),
+                user
         );
     }
 

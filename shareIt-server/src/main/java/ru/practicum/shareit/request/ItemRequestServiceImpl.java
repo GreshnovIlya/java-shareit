@@ -9,6 +9,7 @@ import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.model.ItemRequestMapper;
 import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,12 +29,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto create(ItemRequestDto itemRequestDto, Long requesterId) {
-        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto);
-        itemRequest.setRequester(userRepository.findById(requesterId).orElseThrow(
-                () -> new NotFoundException(String.format("Пользователь с id = %s не найден", requesterId))));
-        itemRequest.setCreated(LocalDateTime.now());
+        User user = userRepository.findById(requesterId).orElseThrow(
+                () -> new NotFoundException(String.format("Пользователь с id = %s не найден", requesterId)));
+        ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, user);
         ItemRequest newItemRequest = itemRequestRepository.save(itemRequest);
-        log.info("Создан запрос на вещь: {}", newItemRequest);
+        //log.info("Создан запрос на вещь: {}", newItemRequest);
         return ItemRequestMapper.toItemRequestDto(newItemRequest, List.of());
     }
 

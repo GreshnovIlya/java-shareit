@@ -47,7 +47,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto create(NewItemDto itemDto, Long owner) {
         Item item = ItemMapper.toItem(itemDto);
         if (itemDto.getRequestId() != null) {
-            item.setRequest(itemRequestRepository.findById(itemDto.getRequestId()) .orElseThrow(
+            item.setRequest(itemRequestRepository.findById(itemDto.getRequestId()).orElseThrow(
                     () -> new NotFoundException(String.format("Запрос с id = %s не найден", itemDto.getRequestId()))));
         }
         item.setOwner(userRepository.findById(owner).orElseThrow(

@@ -32,6 +32,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -69,6 +70,17 @@ public class ItemServiceImplTest {
         assertThat(item.getDescription(), equalTo(newItemDto.getDescription()));
         assertThat(item.getOwner(), equalTo(user));
         assertThat(item.getAvailable(), equalTo(newItemDto.getAvailable()));
+    }
+
+    @Test
+    void failTestSaveItemNotUser() {
+        User user = makeUser("Антон", "anton@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
+
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            itemService.create(newItemDto, user.getId() + 1);
+        }, String.format("Пользователь с id = %s не найден", user.getId() + 1));
     }
 
     @Test
@@ -149,6 +161,24 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    void failTestUpdateItemNotUser() {
+        User user = makeUser("Антон", "anton@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
+        TypedQuery<Item> query = em.createQuery("Select i from Item i where i.id = :id", Item.class);
+        ItemDto updateItemDto =
+                new ItemDto(null, "Молоток", "Молотит", true, null);
+
+        ItemDto itemDto = itemService.create(newItemDto, user.getId());
+        Item item = query.setParameter("id", itemDto.getId())
+                .getSingleResult();
+
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            itemService.update(updateItemDto, user.getId() + 1, item.getId());
+        }, String.format("Пользователь с id = %s не найден", user.getId() + 1));
+    }
+
+    @Test
     void failTestUpdateItemNotOwner() {
         User user = makeUser("Антон", "anton@email.com");
         User user1 = makeUser("Игорь", "igor@email.com");
@@ -186,6 +216,19 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    void failTestGetItemNotItem() {
+        User user = makeUser("Антон", "anton@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
+
+        ItemDto itemDto = itemService.create(newItemDto, user.getId());
+
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            itemService.get(itemDto.getId() + 1);
+        }, String.format("Вещь с id = %s не найдена", itemDto.getId() + 1));
+    }
+
+    @Test
     void testGetAllItemByOwnerItem() {
         User user = makeUser("Антон", "anton@email.com");
         NewItemDto newItemDto =
@@ -203,6 +246,50 @@ public class ItemServiceImplTest {
         assertThat(itemCommentDto.getName(), equalTo(itemInDate.getName()));
         assertThat(itemCommentDto.getDescription(), equalTo(itemInDate.getDescription()));
         assertThat(itemCommentDto.getAvailable(), equalTo(itemInDate.getAvailable()));
+    }
+
+    @Test
+    void testGetAllItemByOwnerItemWithStartAndEndDate() {
+        LocalDateTime localDateTime =
+                LocalDateTime.of(2100, Month.DECEMBER, 12, 12, 12, 12);
+        User owner = makeUser("Антон", "anton@email.com");
+        User booker = makeUser("Игорь", "igor@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
+        TypedQuery<Item> query = em.createQuery("Select i from Item i where i.id = :id", Item.class);
+
+        ItemDto itemDto = itemService.create(newItemDto, owner.getId());
+        NewBookingDto newBookingDto = new NewBookingDto(itemDto.getId(), localDateTime, localDateTime);
+        NewBookingDto newBookingDto1 = new NewBookingDto(itemDto.getId(), localDateTime.plusDays(1), localDateTime.plusDays(1));
+        BookingDto bookingDto = bookingService.create(newBookingDto, booker.getId());
+        bookingService.confirmation(owner.getId(), bookingDto.getId(), true);
+        BookingDto bookingDto1 = bookingService.create(newBookingDto1, booker.getId());
+        bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
+        List<ItemCommentDto> items = itemService.getAllItemByOwner(owner.getId());
+        ItemCommentDto itemCommentDto = items.getFirst();
+        List<Item> itemsInDate = query.setParameter("id", itemDto.getId())
+                .getResultList();
+        Item itemInDate = itemsInDate.getFirst();
+
+        assertThat(items.size(), equalTo(itemsInDate.size()));
+        assertThat(itemCommentDto.getName(), equalTo(itemInDate.getName()));
+        assertThat(itemCommentDto.getDescription(), equalTo(itemInDate.getDescription()));
+        assertThat(itemCommentDto.getAvailable(), equalTo(itemInDate.getAvailable()));
+        assertThat(itemCommentDto.getLastBooking(), equalTo(localDateTime.plusDays(1)));
+        assertThat(itemCommentDto.getNextBooking(), equalTo(localDateTime));
+    }
+
+    @Test
+    void failTestGetAllItemByOwnerItemNotUser() {
+        User user = makeUser("Антон", "anton@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
+
+        itemService.create(newItemDto, user.getId());
+
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            itemService.getAllItemByOwner(user.getId() + 1);
+        }, String.format("Пользователь с id = %s не найден", user.getId() + 1));
     }
 
     @Test
@@ -256,6 +343,47 @@ public class ItemServiceImplTest {
         assertThat(comment.getCreated(), equalTo(commentDto.getCreated()));
         assertThat(comment.getAuthor().getName(), equalTo(commentDto.getAuthorName()));
         assertThat(comment.getItem(), equalTo(item));
+    }
+
+    @Test
+    void failTestCreateCommitNotUser() throws InterruptedException {
+        User owner = makeUser("Антон", "anton@email.com");
+        User author = makeUser("Игорь", "igor@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
+
+        ItemDto itemDto = itemService.create(newItemDto, owner.getId());
+        NewBookingDto newBookingDto =
+                new NewBookingDto(itemDto.getId(), LocalDateTime.now(), LocalDateTime.now());
+        BookingDto bookingDto = bookingService.create(newBookingDto, author.getId());
+        bookingService.confirmation(owner.getId(), bookingDto.getId(), true);
+        TimeUnit.SECONDS.sleep(1);
+        CommentDto commentDto = new CommentDto(null, "Все супер", author.getName(), LocalDateTime.now());
+
+        Assertions.assertThrows(NotFoundException.class, () -> {
+            itemService.createComment(commentDto, author.getId() + 1, itemDto.getId());
+        }, String.format("Пользователь с id = %s не найден", author.getId() + 1));
+    }
+
+    @Test
+    void failTestCreateCommitNotBooker() throws InterruptedException {
+        User owner = makeUser("Антон", "anton@email.com");
+        User author = makeUser("Игорь", "igor@email.com");
+        User user = makeUser("Инна", "inna@email.com");
+        NewItemDto newItemDto =
+                new NewItemDto(null, "Чайник", "Кипятит воду", true, null);
+
+        ItemDto itemDto = itemService.create(newItemDto, owner.getId());
+        NewBookingDto newBookingDto =
+                new NewBookingDto(itemDto.getId(), LocalDateTime.now(), LocalDateTime.now());
+        BookingDto bookingDto = bookingService.create(newBookingDto, author.getId());
+        bookingService.confirmation(owner.getId(), bookingDto.getId(), true);
+        TimeUnit.SECONDS.sleep(1);
+        CommentDto commentDto = new CommentDto(null, "Все супер", author.getName(), LocalDateTime.now());
+
+        Assertions.assertThrows(BadRequestException.class, () -> {
+            itemService.createComment(commentDto, user.getId(), itemDto.getId());
+        }, String.format("Пользователь с id = %s не брал в аренду эту вещь", user.getId()));
     }
 
     private User makeUser(String name, String email) {

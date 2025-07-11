@@ -85,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemCommentDto get(Long id) {
         Item item = itemRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("Вещь с id = %s не найден", id)));
+                () -> new NotFoundException(String.format("Вещь с id = %s не найдена", id)));
         List<Booking> bookings =
                 bookingRepository.findByItemAndStatusAndStartIsAfterOrderByStartDesc(item,
                         StatusBooking.APPROVED, LocalDateTime.now());
@@ -104,7 +104,8 @@ public class ItemServiceImpl implements ItemService {
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", ownerId))));
         return items.stream().map(item -> {
                 ItemCommentDto itemCommentDto = new ItemCommentDto(item.getId(), item.getName(), item.getDescription(),
-                        item.getAvailable(), null, null, null, List.of());
+                        item.getAvailable(), null, null, null,
+                        commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList());
                 if (item.getRequest() != null) {
                     itemCommentDto.setRequest(ItemRequestMapper.toItemRequestInItemDto(item.getRequest()));
                 }
@@ -115,18 +116,17 @@ public class ItemServiceImpl implements ItemService {
                     return itemCommentDto;
                 } else {
                     itemCommentDto.setNextBooking(bookings.getLast().getStart());
-                    itemCommentDto.setNextBooking(bookings.getFirst().getStart());
+                    itemCommentDto.setLastBooking(bookings.getFirst().getStart());
                     return itemCommentDto;
                 }
-
         }).toList();
     }
 
     @Override
     public List<ItemDto> getItemsByNameOrDescription(String text) {
-        if (text.isBlank()) {
+        /*if (text.isBlank()) {
             return new ArrayList<>();
-        }
+        }*/
         return itemRepository.findItemsByNameOrDescriptionContainingIgnoreCase(text)
                 .stream().map(ItemMapper::toItemDto).toList();
     }

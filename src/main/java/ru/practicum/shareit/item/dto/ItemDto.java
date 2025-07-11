@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.dto.ItemRequestInItemDto;
 
 /**
  * TODO Sprint add-controllers.
@@ -28,5 +28,5 @@ public class ItemDto {
     @NotNull(message = "Доступ не должен быть пустым", groups = Default.class)
     private Boolean available;
 
-    private ItemRequest request;
+    private ItemRequestInItemDto request;
 }

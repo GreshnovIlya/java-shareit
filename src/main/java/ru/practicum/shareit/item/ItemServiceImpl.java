@@ -7,11 +7,16 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.StatusBooking;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemCommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.CommentMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.ItemMapper;
+import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequestMapper;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -26,28 +31,35 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
-    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository, BookingRepository bookingRepository, CommentRepository commentRepository) {
+    public ItemServiceImpl(UserRepository userRepository, ItemRepository itemRepository,
+                           BookingRepository bookingRepository, CommentRepository commentRepository,
+                           ItemRequestRepository itemRequestRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
-    public Item create(Item item, Long owner) {
-        if (String.valueOf(item.getAvailable()).equals("null")) {
-            throw new BadRequestException("Доступ не может быть null");
+    public ItemDto create(NewItemDto itemDto, Long owner) {
+        Item item = ItemMapper.toItem(itemDto);
+        if (itemDto.getRequestId() != null) {
+            item.setRequest(itemRequestRepository.findById(itemDto.getRequestId()).orElseThrow(
+                    () -> new NotFoundException(String.format("Запрос с id = %s не найден", itemDto.getRequestId()))));
         }
         item.setOwner(userRepository.findById(owner).orElseThrow(
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", owner))));
         Item newItem = itemRepository.save(item);
-        log.info("Создан пользователь: {}", newItem);
-        return newItem;
+        log.info("Создана вещь: {}", newItem);
+        return ItemMapper.toItemDto(newItem);
     }
 
     @Override
-    public Item update(Item item, Long owner, Long itemId) {
+    public ItemDto update(ItemDto itemDto, Long owner, Long itemId) {
+        Item item = ItemMapper.toItem(itemDto);
         item.setOwner(userRepository.findById(owner).orElseThrow(
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", owner))));
         Item updateItem = itemRepository.findById(itemId).orElseThrow(
@@ -66,8 +78,8 @@ public class ItemServiceImpl implements ItemService {
             updateItem.setAvailable(item.getAvailable());
         }
         itemRepository.save(updateItem);
-        log.info("Обновлен пользователь: {}", updateItem);
-        return updateItem;
+        log.info("Обновлена вещь: {}", updateItem);
+        return ItemMapper.toItemDto(updateItem);
     }
 
     @Override
@@ -96,9 +108,11 @@ public class ItemServiceImpl implements ItemService {
                     .name(item.getName())
                     .description(item.getDescription())
                     .available(item.getAvailable())
-                    .request(item.getRequest())
                     .comments(commentRepository.findByItem(item).stream().map(CommentMapper::toCommentDto).toList())
                     .build();
+                if (item.getRequest() != null) {
+                    itemCommentDto.setRequest(ItemRequestMapper.toItemRequestInItemDto(item.getRequest()));
+                }
                 List<Booking> bookings =
                         bookingRepository.findByItemAndStatusAndStartIsAfterOrderByStartDesc(item,
                                 StatusBooking.APPROVED, LocalDateTime.now());
@@ -114,15 +128,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> getItemsByNameOrDescription(String text) {
+    public List<ItemDto> getItemsByNameOrDescription(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemRepository.findItemsByNameOrDescriptionContainingIgnoreCase(text);
+        return itemRepository.findItemsByNameOrDescriptionContainingIgnoreCase(text)
+                .stream().map(ItemMapper::toItemDto).toList();
     }
 
     @Override
-    public Comment createComment(Comment comment, Long authorId, Long itemId) {
+    public CommentDto createComment(CommentDto commentDto, Long authorId, Long itemId) {
+        Comment comment = CommentMapper.toComment(commentDto);
         User author = userRepository.findById(authorId).orElseThrow(
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", authorId)));
         Item item = itemRepository.findById(itemId).orElseThrow(
@@ -135,6 +151,6 @@ public class ItemServiceImpl implements ItemService {
         comment.setAuthor(author);
         Comment newComment = commentRepository.save(comment);
         log.info("Создан отзыв: {}", newComment);
-        return newComment;
+        return CommentMapper.toCommentDto(newComment);
     }
 }

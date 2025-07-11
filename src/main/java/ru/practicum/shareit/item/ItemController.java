@@ -16,8 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemCommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.CommentMapper;
-import ru.practicum.shareit.item.model.ItemMapper;
+import ru.practicum.shareit.item.dto.NewItemDto;
 import ru.practicum.shareit.validation.UpdateValidationGroup;
 
 import java.util.List;
@@ -36,20 +35,19 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto create(@Valid @RequestBody ItemDto item,
+    public ItemDto create(@Valid @RequestBody NewItemDto item,
                           @RequestHeader("X-Sharer-User-Id") Long owner) {
-        return ItemMapper.toItemDto(itemService.create(ItemMapper.toItem(item), owner));
+        return itemService.create(item, owner);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@Validated(UpdateValidationGroup.class) @RequestBody ItemDto item,
                           @RequestHeader("X-Sharer-User-Id") Long owner, @PathVariable Long itemId) {
-        return ItemMapper.toItemDto(itemService.update(ItemMapper.toItem(item), owner, itemId));
+        return itemService.update(item, owner, itemId);
     }
 
     @GetMapping("/{id}")
     public ItemCommentDto get(@PathVariable Long id) {
-        System.out.println(itemService.get(id));
         return itemService.get(id);
     }
 
@@ -60,14 +58,13 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemDto> getItemsByNameOrDescription(@RequestParam String text) {
-        return itemService.getItemsByNameOrDescription(text).stream().map(ItemMapper::toItemDto).toList();
+        return itemService.getItemsByNameOrDescription(text);
     }
 
     @PostMapping("/{itemId}/comment")
     @ResponseStatus(HttpStatus.CREATED)
     public CommentDto createComment(@Valid @RequestBody CommentDto commentDto,
                           @RequestHeader("X-Sharer-User-Id") Long authorId, @PathVariable Long itemId) {
-        return CommentMapper.toCommentDto(itemService.createComment(CommentMapper.toComment(commentDto), authorId,
-                itemId));
+        return itemService.createComment(commentDto, authorId, itemId);
     }
 }

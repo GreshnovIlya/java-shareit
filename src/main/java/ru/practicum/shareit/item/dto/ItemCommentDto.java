@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.dto.ItemRequestInItemDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +18,7 @@ public class ItemCommentDto {
     private String name;
     private String description;
     private Boolean available;
-    private ItemRequest request;
+    private ItemRequestInItemDto request;
     private LocalDateTime nextBooking;
     private LocalDateTime lastBooking;
     private List<CommentDto> comments;

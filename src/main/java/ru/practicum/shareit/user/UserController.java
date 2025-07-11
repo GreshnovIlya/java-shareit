@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.UserMapper;
 import ru.practicum.shareit.validation.UpdateValidationGroup;
 
 import java.util.List;
@@ -33,22 +32,22 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto create(@Valid @RequestBody UserDto user) {
-        return UserMapper.toUserDto(userService.create(UserMapper.toUser(user)));
+        return userService.create(user);
     }
 
     @PatchMapping("/{id}")
     public UserDto update(@PathVariable Long id, @Validated(UpdateValidationGroup.class) @RequestBody UserDto user) {
-        return UserMapper.toUserDto(userService.update(id, UserMapper.toUser(user)));
+        return userService.update(id, user);
     }
 
     @GetMapping("/{id}")
     public UserDto get(@PathVariable Long id) {
-        return UserMapper.toUserDto(userService.get(id));
+        return userService.get(id);
     }
 
     @GetMapping
     public List<UserDto> getAll() {
-        return userService.getAll().stream().map(UserMapper::toUserDto).toList();
+        return userService.getAll();
     }
 
     @DeleteMapping("/{id}")

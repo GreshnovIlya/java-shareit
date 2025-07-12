@@ -22,7 +22,7 @@
 
     <modules>
         <module>shareIt-server</module>
-		<module>shareIt-gateway</module>
+		<module>gateway</module>
 	</modules>
 
 	<build>

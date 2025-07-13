@@ -32,7 +32,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", requesterId)));
         ItemRequest itemRequest = ItemRequestMapper.toItemRequest(itemRequestDto, user);
         ItemRequest newItemRequest = itemRequestRepository.save(itemRequest);
-        //log.info("Создан запрос на вещь: {}", newItemRequest);
+        log.info("Создан запрос на вещь: {}", newItemRequest);
         return ItemRequestMapper.toItemRequestDto(newItemRequest, List.of());
     }
 

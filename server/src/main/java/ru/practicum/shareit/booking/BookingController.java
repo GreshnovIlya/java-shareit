@@ -51,12 +51,16 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getAllBookingUser(@RequestHeader("X-Sharer-User-Id") Long userId,
                                               @RequestParam Map<String, Object> parameters) {
-        return bookingService.getAllBookingUser(userId, State.from((String) parameters.get("state")).get());
+        return bookingService.getAllBooking(userId, State.from((String) parameters.get("state"))
+                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + parameters.get("state"))),
+                false);
     }
 
     @GetMapping("owner")
     public List<BookingDto> getAllBookingOwner(@RequestHeader("X-Sharer-User-Id") Long ownerId,
                                               @RequestParam Map<String, Object> parameters) {
-        return bookingService.getAllBookingOwner(ownerId, State.from((String) parameters.get("state")).get());
+        return bookingService.getAllBooking(ownerId, State.from((String) parameters.get("state"))
+                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + parameters.get("state"))),
+                true);
     }
 }

@@ -45,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
         }
         Booking booking = BookingMapper.toBooking(newBooking, user, item);
         bookingRepository.save(booking);
-        //log.info("Вещь с id = {} запрошена пользователем с id = {}", item.getId(), userId);
+        log.info("Вещь с id = {} запрошена пользователем с id = {}", item.getId(), userId);
         return BookingMapper.toBookingDto(booking);
     }
 
@@ -53,7 +53,8 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto confirmation(Long ownerId, Long bookingId, boolean approved) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(
                 () -> new NotFoundException(String.format("Бронь с id = %s не найдена", bookingId)));
-        Item item = itemRepository.findById(booking.getItem().getId()).get();
+        Item item = itemRepository.findById(booking.getItem().getId()).orElseThrow(
+                () -> new NotFoundException(String.format("Вещь с id = %s не найден", booking.getItem().getId())));
         if (!Objects.equals(item.getOwner().getId(), ownerId)) {
             throw new NotOwnerException("Одобрить бронь может только владелец вещи");
         }
@@ -62,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
         } else {
             booking.setStatus(StatusBooking.REJECTED);
         }
-        //log.info("Вещь с id = {} забронирована пользователем с id = {}", item.getId(), booking.getBooker().getId());
+        log.info("Вещь с id = {} забронирована пользователем с id = {}", item.getId(), booking.getBooker().getId());
         bookingRepository.save(booking);
         return BookingMapper.toBookingDto(booking);
     }
@@ -71,7 +72,8 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto get(Long userId, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(
                 () -> new NotFoundException(String.format("Бронь с id = %s не найдена", bookingId)));
-        Item item = itemRepository.findById(booking.getItem().getId()).get();
+        Item item = itemRepository.findById(booking.getItem().getId()).orElseThrow(
+                () -> new NotFoundException(String.format("Вещь с id = %s не найден", booking.getItem().getId())));;
         if (!Objects.equals(item.getOwner().getId(), userId) && !Objects.equals(booking.getBooker().getId(), userId)) {
             throw new NotOwnerException("Просмотреть информацию о брони может только владелец вещи или ее арендатор");
         }
@@ -79,69 +81,66 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllBookingUser(Long userId, State state) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new NotFoundException(String.format("Пользователь с id %s не найден", userId)));
+    public List<BookingDto> getAllBooking(Long userId, State state, boolean isOwner) {
+        User user;
+        if (isOwner) {
+            user = userRepository.findById(userId).orElseThrow(
+                    () -> new NotFoundException(String.format("Пользователь с id %s не найден", userId)));
+        } else {
+            user = userRepository.findById(userId).orElseThrow(
+                    () -> new NotFoundException(String.format("Пользователь с id %s не найден", userId)));
+        }
         switch (state) {
             case ALL -> {
+                if (isOwner) {
+                    return bookingRepository.findByItemOwnerOrderByStartDesc(user)
+                            .stream().map(BookingMapper::toBookingDto).toList();
+                }
                 return bookingRepository.findByBookerOrderByStartDesc(user)
                         .stream().map(BookingMapper::toBookingDto).toList();
             }
             case CURRENT -> {
+                if (isOwner) {
+                    return bookingRepository.findByItemOwnerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(user,
+                                    LocalDateTime.now(), LocalDateTime.now())
+                            .stream().map(BookingMapper::toBookingDto).toList();
+                }
                 return bookingRepository.findByBookerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(user,
                         LocalDateTime.now(), LocalDateTime.now())
                         .stream().map(BookingMapper::toBookingDto).toList();
             }
             case PAST -> {
+                if (isOwner) {
+                    return bookingRepository.findByItemOwnerAndEndIsBeforeOrderByStartDesc(user, LocalDateTime.now())
+                            .stream().map(BookingMapper::toBookingDto).toList();
+                }
                 return bookingRepository.findByBookerAndEndIsBeforeOrderByStartDesc(user, LocalDateTime.now())
                         .stream().map(BookingMapper::toBookingDto).toList();
             }
             case FUTURE -> {
+                if (isOwner) {
+                    return bookingRepository.findByItemOwnerAndStartIsAfterOrderByStartDesc(user, LocalDateTime.now())
+                            .stream().map(BookingMapper::toBookingDto).toList();
+                }
                 return bookingRepository.findByBookerAndStartIsAfterOrderByStartDesc(user, LocalDateTime.now())
                         .stream().map(BookingMapper::toBookingDto).toList();
             }
             case WAITING -> {
+                if (isOwner) {
+                    return bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(user, StatusBooking.WAITING)
+                            .stream().map(BookingMapper::toBookingDto).toList();
+                }
                 return bookingRepository.findByBookerAndStatusOrderByStartDesc(user, StatusBooking.WAITING)
                         .stream().map(BookingMapper::toBookingDto).toList();
             }
             //REJECTED
             default -> {
+                if (isOwner) {
+                    return bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(user, StatusBooking.REJECTED)
+                            .stream().map(BookingMapper::toBookingDto).toList();
+                }
                 return bookingRepository.findByBookerAndStatusOrderByStartDesc(user,
                         StatusBooking.REJECTED)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            }
-        }
-    }
-
-    @Override
-    public List<BookingDto> getAllBookingOwner(Long ownerId, State state) {
-        User owner = userRepository.findById(ownerId).orElseThrow(
-                () -> new NotFoundException(String.format("Пользователь с id %s не найден", ownerId)));
-        switch (state) {
-            case ALL -> {
-                return bookingRepository.findByItemOwnerOrderByStartDesc(owner)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            }
-            case CURRENT -> {
-                return bookingRepository.findByItemOwnerAndStartIsBeforeAndEndIsAfterOrderByStartDesc(owner,
-                        LocalDateTime.now(), LocalDateTime.now())
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            }
-            case PAST -> {
-                return bookingRepository.findByItemOwnerAndEndIsBeforeOrderByStartDesc(owner, LocalDateTime.now())
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            }
-            case FUTURE -> {
-                return bookingRepository.findByItemOwnerAndStartIsAfterOrderByStartDesc(owner, LocalDateTime.now())
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            }
-            case WAITING -> {
-                return bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(owner, StatusBooking.WAITING)
-                        .stream().map(BookingMapper::toBookingDto).toList();
-            }
-            //REJECTED
-            default -> {
-                return bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(owner, StatusBooking.REJECTED)
                         .stream().map(BookingMapper::toBookingDto).toList();
             }
         }

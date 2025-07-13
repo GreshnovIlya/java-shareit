@@ -32,7 +32,7 @@ public class ItemController {
     public ResponseEntity<Object> createItem(@Valid @RequestBody NewItemDto item,
                                              @Positive @RequestHeader("X-Sharer-User-Id") long owner)
                                                                                             throws BadRequestException {
-        if (String.valueOf(item.getAvailable()).equals("null")) {
+        if (item.getAvailable() == null) {
             throw new BadRequestException("Доступ не может быть null");
         }
         log.info("Запрос на создание вещи: {} пользователем с id = {}", item, owner);

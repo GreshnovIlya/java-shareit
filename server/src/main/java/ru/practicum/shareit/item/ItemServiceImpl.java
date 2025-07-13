@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
                 () -> new NotFoundException(String.format("Пользователь с id = %s не найден", owner)));
         Item item = ItemMapper.toItem(itemDto, itemRequest, user);
         Item newItem = itemRepository.save(item);
-        //log.info("Создана вещь: {}", newItem);
+        log.info("Создана вещь: {}", newItem);
         return ItemMapper.toItemDto(newItem);
     }
 
@@ -79,7 +79,7 @@ public class ItemServiceImpl implements ItemService {
             updateItem.setAvailable(item.getAvailable());
         }
         itemRepository.save(updateItem);
-        //log.info("Обновлена вещь: {}", updateItem);
+        log.info("Обновлена вещь: {}", updateItem);
         return ItemMapper.toItemDto(updateItem);
     }
 
@@ -139,7 +139,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Comment comment = CommentMapper.toComment(commentDto, item, author);
         Comment newComment = commentRepository.save(comment);
-        //log.info("Создан отзыв: {}", newComment);
+        log.info("Создан отзыв: {}", newComment);
         return CommentMapper.toCommentDto(newComment);
     }
 }

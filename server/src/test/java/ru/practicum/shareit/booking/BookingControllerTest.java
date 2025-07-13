@@ -153,7 +153,7 @@ class BookingControllerTest {
 
     @Test
     void getAllBookingUser() throws Exception {
-        when(bookingService.getAllBookingUser(anyLong(), any(State.class)))
+        when(bookingService.getAllBooking(anyLong(), any(State.class), false))
                 .thenReturn(List.of(bookingDto));
 
         mvc.perform(get("/bookings?state={state}", State.ALL)
@@ -176,7 +176,7 @@ class BookingControllerTest {
 
     @Test
     void getAllBookingOwner() throws Exception {
-        when(bookingService.getAllBookingOwner(anyLong(), any(State.class)))
+        when(bookingService.getAllBooking(anyLong(), any(State.class), true))
                 .thenReturn(List.of(bookingDto));
 
         mvc.perform(get("/bookings/owner?state={state}", State.ALL)

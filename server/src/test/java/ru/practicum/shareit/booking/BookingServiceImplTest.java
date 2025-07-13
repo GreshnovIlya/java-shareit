@@ -226,7 +226,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), true);
-        List<BookingDto> bookings = bookingService.getAllBookingUser(booker.getId(), State.ALL);
+        List<BookingDto> bookings = bookingService.getAllBooking(booker.getId(), State.ALL, false);
 
         assertThat(bookings.size(), equalTo(2));
     }
@@ -245,7 +245,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), true);
-        List<BookingDto> bookings = bookingService.getAllBookingUser(booker.getId(), State.CURRENT);
+        List<BookingDto> bookings = bookingService.getAllBooking(booker.getId(), State.CURRENT, false);
 
         assertThat(bookings.size(), equalTo(1));
     }
@@ -263,7 +263,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), true);
-        List<BookingDto> bookings = bookingService.getAllBookingUser(booker.getId(), State.PAST);
+        List<BookingDto> bookings = bookingService.getAllBooking(booker.getId(), State.PAST, false);
 
         assertThat(bookings.size(), equalTo(2));
     }
@@ -282,7 +282,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), true);
-        List<BookingDto> bookings = bookingService.getAllBookingUser(booker.getId(), State.FUTURE);
+        List<BookingDto> bookings = bookingService.getAllBooking(booker.getId(), State.FUTURE, false);
 
         assertThat(bookings.size(), equalTo(1));
     }
@@ -300,7 +300,7 @@ public class BookingServiceImplTest {
 
         bookingService.create(newBookingDto1, booker.getId());
         bookingService.create(newBookingDto2, booker.getId());
-        List<BookingDto> bookings = bookingService.getAllBookingUser(booker.getId(), State.WAITING);
+        List<BookingDto> bookings = bookingService.getAllBooking(booker.getId(), State.WAITING, false);
 
         assertThat(bookings.size(), equalTo(2));
     }
@@ -320,7 +320,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), false);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), false);
-        List<BookingDto> bookings = bookingService.getAllBookingUser(booker.getId(), State.REJECTED);
+        List<BookingDto> bookings = bookingService.getAllBooking(booker.getId(), State.REJECTED, false);
 
         assertThat(bookings.size(), equalTo(2));
     }
@@ -342,7 +342,7 @@ public class BookingServiceImplTest {
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), false);
 
         Assertions.assertThrows(NotFoundException.class, () -> {
-            List<BookingDto> bookings = bookingService.getAllBookingUser(booker.getId() + 1, State.ALL);
+            List<BookingDto> bookings = bookingService.getAllBooking(booker.getId() + 1, State.ALL, false);
         }, String.format("Пользователь с id %s не найден", booker.getId() + 1));
     }
 
@@ -359,7 +359,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), true);
-        List<BookingDto> bookings = bookingService.getAllBookingOwner(owner.getId(), State.ALL);
+        List<BookingDto> bookings = bookingService.getAllBooking(owner.getId(), State.ALL, true);
 
         assertThat(bookings.size(), equalTo(2));
     }
@@ -378,7 +378,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), true);
-        List<BookingDto> bookings = bookingService.getAllBookingOwner(owner.getId(), State.CURRENT);
+        List<BookingDto> bookings = bookingService.getAllBooking(owner.getId(), State.CURRENT, true);
 
         assertThat(bookings.size(), equalTo(1));
     }
@@ -396,7 +396,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), true);
-        List<BookingDto> bookings = bookingService.getAllBookingOwner(owner.getId(), State.PAST);
+        List<BookingDto> bookings = bookingService.getAllBooking(owner.getId(), State.PAST, true);
 
         assertThat(bookings.size(), equalTo(2));
     }
@@ -415,7 +415,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), true);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), true);
-        List<BookingDto> bookings = bookingService.getAllBookingOwner(owner.getId(), State.FUTURE);
+        List<BookingDto> bookings = bookingService.getAllBooking(owner.getId(), State.FUTURE, true);
 
         assertThat(bookings.size(), equalTo(1));
     }
@@ -433,7 +433,7 @@ public class BookingServiceImplTest {
 
         bookingService.create(newBookingDto1, booker.getId());
         bookingService.create(newBookingDto2, booker.getId());
-        List<BookingDto> bookings = bookingService.getAllBookingOwner(owner.getId(), State.WAITING);
+        List<BookingDto> bookings = bookingService.getAllBooking(owner.getId(), State.WAITING, true);
 
         assertThat(bookings.size(), equalTo(2));
     }
@@ -453,7 +453,7 @@ public class BookingServiceImplTest {
         BookingDto bookingDto2 = bookingService.create(newBookingDto2, booker.getId());
         bookingService.confirmation(owner.getId(), bookingDto1.getId(), false);
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), false);
-        List<BookingDto> bookings = bookingService.getAllBookingOwner(owner.getId(), State.REJECTED);
+        List<BookingDto> bookings = bookingService.getAllBooking(owner.getId(), State.REJECTED, true);
 
         assertThat(bookings.size(), equalTo(2));
     }
@@ -475,7 +475,7 @@ public class BookingServiceImplTest {
         bookingService.confirmation(owner.getId(), bookingDto2.getId(), false);
 
         Assertions.assertThrows(NotFoundException.class, () -> {
-            List<BookingDto> bookings = bookingService.getAllBookingOwner(owner.getId() + 2, State.ALL);
+            List<BookingDto> bookings = bookingService.getAllBooking(owner.getId() + 2, State.ALL, true);
         }, String.format("Пользователь с id %s не найден", owner.getId() + 2));
     }
 
